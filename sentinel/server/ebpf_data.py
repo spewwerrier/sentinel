@@ -12,7 +12,7 @@ def incoming(request: HttpRequest):
             data, address = sock_incoming.recvfrom(4096)
             yield f"data: {data.decode('utf-8')}\n\n"
 
-            time.sleep(0.1)
+            time.sleep(0.2)
 
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
     response['Cache-Control'] = 'no-cache'
@@ -25,7 +25,7 @@ def blocked(request: HttpRequest):
             data, address = sock_block.recvfrom(4096)
             yield f"data: {data.decode('utf-8')}\n\n"
 
-            time.sleep(0.1)
+            time.sleep(0.3)
 
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
     response['Cache-Control'] = 'no-cache'

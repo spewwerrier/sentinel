@@ -23,8 +23,7 @@ except Exception as e:
 
 # we define what logging we want to enable, enabling both is okay
 log = logger.Logger(b)
-log.incoming()
-log.blocked()
+log.log()
 
 # blacklist_protocol = b["blacklist_protocol"]
 # blacklist_protocol[ctypes.c_uint8(1)] = ctypes.c_bool(True)
@@ -58,7 +57,7 @@ try:
     print("Running... (Ctrl+C to stop)")
     while True:
         b.ring_buffer_poll()
-        time.sleep(0.1)
+        time.sleep(0.3)
 except KeyboardInterrupt:
     stop_event.set()
     listen_thread.join()

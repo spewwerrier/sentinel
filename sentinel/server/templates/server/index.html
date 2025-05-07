@@ -55,6 +55,13 @@
         ipCell.innerText = ip;
         const packetCell = document.createElement("td");
         packetCell.innerText = packet;
+				if(json.blocked == "True"){
+					ipCell.style.color = "white";
+					ipCell.style.backgroundColor = "black";
+
+					packetCell.style.color = "white";
+					packetCell.style.backgroundColor = "black";
+				}
 
         const newRow = document.createElement("tr");
         newRow.appendChild(ipCell);

@@ -50,17 +50,19 @@ int handle_rx(struct xdp_md *ctx) {
         }
 
 
-        // https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml        
-        if(blacklist_protocol.lookup(&ip->protocol)){
-          return XDP_DROP;
-        }
-
         __be32 saddr = ip->saddr;
         _Bool *elem = blacklist_ipv4.lookup(&saddr);
 
         struct ipv4_pkt pkt;
-        pkt.saddr = saddr;
         pkt.pkt_size = data_len;
+        pkt.saddr = saddr;
+
+        // https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml        
+        if(blacklist_protocol.lookup(&ip->protocol)){
+            blocked_ipv4.ringbuf_output(&pkt, sizeof(pkt), 0);
+          return XDP_DROP;
+        }
+
 
         if (elem != NULL){
             // rb type blocked
@@ -74,15 +76,12 @@ int handle_rx(struct xdp_md *ctx) {
 
     // ipv6
     if(bpf_ntohs(eth->h_proto) == ETH_P_IPV6){
+
         struct ipv6hdr *ip = (void *)(data + sizeof(struct ethhdr));
         if((void*)(eth + 1) + sizeof(struct ipv6hdr) > data_end){
             return XDP_PASS;
         }
 
-        // https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml        
-        if(blacklist_protocol.lookup(&ip->nexthdr)){
-          return XDP_DROP;
-        }
 
         struct in6_addr saddr = ip->saddr;
         struct ipv6_addr map_key;
@@ -106,8 +105,13 @@ int handle_rx(struct xdp_md *ctx) {
                     ((__u64)saddr.s6_addr[15]);
 
         struct ipv6_pkt pkt;
-        pkt.saddr = saddr;
         pkt.pkt_size = data_len;
+        pkt.saddr = saddr;
+        // https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml        
+        if(blacklist_protocol.lookup(&ip->nexthdr)){
+        blocked_ipv6.ringbuf_output(&pkt, sizeof(pkt), 0);
+          return XDP_DROP;
+        }
 
         _Bool *elem = blacklist_ipv6.lookup(&map_key);
         if(elem != NULL && *elem){
