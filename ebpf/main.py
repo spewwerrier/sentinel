@@ -5,6 +5,7 @@ import socket
 import struct
 import sys
 import ctypes
+import threading
 
 import logger
 import iptypes
@@ -133,8 +134,6 @@ except Exception as e:
     print(f"Failed to attach BPF program: {e}")
     sys.exit(1)
 
-
-
 blocker.block_ipv4(b, "172.67.188.103")
 blocker.block_ipv4(b, "104.21.33.3")
 blocker.block_ipv6(b, "2606:4700:3032::ac43:bc67")
@@ -153,3 +152,5 @@ except KeyboardInterrupt:
 
 b.remove_xdp(iface, BPF.XDP_FLAGS_SKB_MODE)
 print("Detached BPF program.")
+
+
