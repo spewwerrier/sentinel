@@ -1,5 +1,6 @@
 from django.http import HttpResponse, HttpRequest, StreamingHttpResponse
-from server import sock_incoming, sock_block
+from server import sock_incoming, sock_block, send_socket
+from django.views.decorators.csrf import csrf_exempt
 import time
 
 def incoming(request: HttpRequest):
@@ -8,7 +9,7 @@ def incoming(request: HttpRequest):
             data, address = sock_incoming.recvfrom(4096)
             yield f"data: {data.decode('utf-8')}\n\n"
 
-            time.sleep(0.5)
+            time.sleep(0.1)
 
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
     response['Cache-Control'] = 'no-cache'
@@ -21,9 +22,16 @@ def blocked(request: HttpRequest):
             data, address = sock_block.recvfrom(4096)
             yield f"data: {data.decode('utf-8')}\n\n"
 
-            time.sleep(0.5)
+            time.sleep(0.1)
 
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
     response['Cache-Control'] = 'no-cache'
     
     return response 
+
+@csrf_exempt
+def filter(request: HttpRequest):
+    req = request.POST;
+    data = req['ipstring']
+    send_socket.sendto(data.encode('utf-8'), ("localhost", 7779))
+    return HttpResponse("filtered")

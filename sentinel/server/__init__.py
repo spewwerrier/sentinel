@@ -19,3 +19,5 @@ try:
 except socket.error as e:
     print(f"{e} double connection")
 
+
+send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
