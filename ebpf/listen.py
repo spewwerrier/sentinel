@@ -1,5 +1,4 @@
 import socket
-blocked = 7778
 incoming = 7777
 
 def receive_udp_data(port):

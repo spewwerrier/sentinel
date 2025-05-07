@@ -6,6 +6,3 @@ from django.template import loader
 # other request are done by ebpf_data.py
 def index(request: HttpRequest):
     return render(request, 'server/index.html')
-
-def block(request: HttpRequest):
-    return render(request, 'server/blocked.html')
