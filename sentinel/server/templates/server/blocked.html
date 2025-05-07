@@ -21,11 +21,6 @@
 <body>
 	<h1>IP Logs</h1>
 
-	<form method="POST" action="/block" accept-charset="utf-8">
-		<input type="text" name="ipstring" required></input>
-		<button type="submit">submit</button>
-	</form>
-
 	<table id="headtable" border=1>
 		<tr>
 			<th>Ip address</th>
@@ -44,7 +39,7 @@
 	<script>
 	
 	const iptablesBody = document.getElementById("iptables").getElementsByTagName('tbody')[0];
-		const eventSource = new EventSource("/incoming/");
+		const eventSource = new EventSource("/blocked/");
 		eventSource.onmessage = function(event) {
 
         const json = JSON.parse(event.data);

@@ -20,13 +20,15 @@ def callback(data, size, output_socket, dest_port):
             ((event.saddr >> 16) & 0xFF),
             ((event.saddr >> 24) & 0xFF),
         )
-        log_message = f"Ipv4 {ipv4_address}, packet size: {event.pkt_size}"
-        print(log_message)
+
+
+        log_message = f""" {{ "ip": "{ipv4_address}", "packet": {event.pkt_size} }} """
+        # log_message = f"Ipv4 {ipv4_address}, packet size: {event.pkt_size}"
     else:
         event = ctypes.cast(data, ctypes.POINTER(iptypes.IPv6Pkt)).contents
         ipv6_address = socket.inet_ntop(socket.AF_INET6, event.saddr.s6_addr)
-        log_message = f"Ipv6 {ipv6_address}, packet size: {event.pkt_size}"
-        print(log_message)
+        log_message = f""" {{ "ip": "{ipv6_address}", "packet": {event.pkt_size} }} """
+        # log_message = f"Ipv6 {ipv6_address}, packet size: {event.pkt_size}"
 
     try:
         output_socket.sendto(log_message.encode('utf-8'), (SOCKET_ADDR, dest_port))
