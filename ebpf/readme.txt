@@ -1,4 +1,4 @@
-Ebpf application to block the ip address. It runs a tcp server that does all the communication.
+Ebpf application to block the ip address. It runs a udp server that does all the communication.
 
 sudo main.py
 

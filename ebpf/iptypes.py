@@ -1,5 +1,7 @@
 import ctypes
 
+# custom c types to convert python data types to c types
+# refer to the c program to see the respective types
 class IPv4Pkt(ctypes.Structure):
     _fields_ = [
         ("saddr", ctypes.c_uint32),

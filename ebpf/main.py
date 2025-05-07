@@ -11,120 +11,7 @@ import logger
 import iptypes
 import blocker
 
-# TODO: since skb_buff works with bcc try dropping the packet in skb_buff
-bpf_text = """
-#include <linux/bpf.h>
-#include <linux/if_ether.h>
-#include <linux/in6.h>
-#include <linux/ip.h>
-#include <linux/ipv6.h>
-#include <linux/types.h>
-
-struct ipv4_pkt {
-    __be32 saddr;
-    __u32 pkt_size;
-};
-
-struct ipv6_addr {
-    __u64 high;
-    __u64 low;
-};
-
-struct ipv6_pkt {
-    struct in6_addr saddr;
-    __u32 pkt_size;
-}__attribute__((packed));
-
-
-BPF_HASH(blacklist_ipv4, __be32, bool);
-BPF_HASH(blacklist_ipv6, struct ipv6_addr, bool);
-
-BPF_RINGBUF_OUTPUT(incoming_ipv4, 1 << 4);
-BPF_RINGBUF_OUTPUT(incoming_ipv6, 1 << 4);
-
-BPF_RINGBUF_OUTPUT(blocked_ipv4, 1 << 4);
-BPF_RINGBUF_OUTPUT(blocked_ipv6, 1 << 4);
-
-int handle_rx(struct xdp_md *ctx) {
-    void *data = (void *)(long)ctx->data;
-    void *data_end = (void *)(long)ctx->data_end;
-    __u32 data_len = data_end - data;
-
-    struct ethhdr *eth = data;
-    if ((void*) (eth+1) > data_end){
-        return XDP_PASS;
-    }
-
-    // ipv4
-    if(bpf_ntohs(eth->h_proto) == ETH_P_IP){
-        struct iphdr *ip = (void *)(data + sizeof(struct ethhdr));
-        if ((void*)(eth + 1) + sizeof(struct iphdr) > data_end) {
-            return XDP_PASS;
-        }
-        __be32 saddr = ip->saddr;
-        _Bool *elem = blacklist_ipv4.lookup(&saddr);
-
-        struct ipv4_pkt pkt;
-        pkt.saddr = saddr;
-        pkt.pkt_size = data_len;
-
-        if (elem != NULL){
-            // rb type blocked
-            blocked_ipv4.ringbuf_output(&pkt, sizeof(pkt), 0);
-            return XDP_DROP;
-        }
-        // rb type logs
-        incoming_ipv4.ringbuf_output(&pkt, sizeof(pkt), 0);
-        return XDP_PASS;
-    }
-
-    // ipv6
-    if(bpf_ntohs(eth->h_proto) == ETH_P_IPV6){
-        struct ipv6hdr *ip = (void *)(data + sizeof(struct ethhdr));
-        if((void*)(eth + 1) + sizeof(struct ipv6hdr) > data_end){
-            return XDP_PASS;
-        }
-        struct in6_addr saddr = ip->saddr;
-        struct ipv6_addr map_key;
-
-        map_key.high = ((__u64)saddr.s6_addr[0] << 56) |
-                     ((__u64)saddr.s6_addr[1] << 48) |
-                     ((__u64)saddr.s6_addr[2] << 40) |
-                     ((__u64)saddr.s6_addr[3] << 32) |
-                     ((__u64)saddr.s6_addr[4] << 24) |
-                     ((__u64)saddr.s6_addr[5] << 16) |
-                     ((__u64)saddr.s6_addr[6] << 8) |
-                     ((__u64)saddr.s6_addr[7]);
-
-        map_key.low = ((__u64)saddr.s6_addr[8] << 56) |
-                    ((__u64)saddr.s6_addr[9] << 48) |
-                    ((__u64)saddr.s6_addr[10] << 40) |
-                    ((__u64)saddr.s6_addr[11] << 32) |
-                    ((__u64)saddr.s6_addr[12] << 24) |
-                    ((__u64)saddr.s6_addr[13] << 16) |
-                    ((__u64)saddr.s6_addr[14] << 8) |
-                    ((__u64)saddr.s6_addr[15]);
-
-        struct ipv6_pkt pkt;
-        pkt.saddr = saddr;
-        pkt.pkt_size = data_len;
-
-        _Bool *elem = blacklist_ipv6.lookup(&map_key);
-        if(elem != NULL && *elem){
-            // rb type blocked
-            blocked_ipv6.ringbuf_output(&pkt, sizeof(pkt), 0);
-            return XDP_DROP;
-        }
-        // rb type logs
-        incoming_ipv6.ringbuf_output(&pkt, sizeof(pkt), 0);
-        return XDP_PASS;
-    }
-
-    return XDP_PASS;
-}
-"""
-
-b = BPF(text=bpf_text)
+b = BPF(text=open('packet.ebpf.c', 'r').read())
 iface = "wlp2s0"
 fn = b.load_func("handle_rx", BPF.XDP)
 
@@ -134,15 +21,17 @@ except Exception as e:
     print(f"Failed to attach BPF program: {e}")
     sys.exit(1)
 
-logger.incoming(b)
-logger.blocked(b)
+# we define what logging we want to enable, enabling both is okay
+log = logger.Logger(b)
+log.incoming()
+log.blocked()
 
-
+# we listen on port 7779 and expect ipv4 and ipv6 and block them
 def listen_ip():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_address = ('localhost', 7779)
     sock.bind(server_address)
-    print(f"Listening for UDP data on port 7779")
+    print(f"listening for ip at 7779")
     while True:
         data, address = sock.recvfrom(4096)
         utf_data = data.decode('utf-8')
@@ -150,19 +39,13 @@ def listen_ip():
             blocker.block_ipv6(b, utf_data)
         else:
             blocker.block_ipv4(b, utf_data)
-        # blocker.block_ipv4(b, data.decode('utf-8'))
-
-        # blocker.block_ipv4(b, "172.67.188.103")
-        # blocker.block_ipv4(b, "104.21.33.3")
-        # blocker.block_ipv6(b, "2606:4700:3032::ac43:bc67")
-        # blocker.block_ipv6(b, "2606:4700:3035::6815:2103")
-
         print(f"blocking ip {data.decode('utf-8')}")
 
 
+stop_event = threading.Event()
 listen_thread = threading.Thread(target=listen_ip)
+listen_thread.daemon = True
 listen_thread.start()
-
 
 try:
     print("Running... (Ctrl+C to stop)")
@@ -170,9 +53,9 @@ try:
         b.ring_buffer_poll()
         time.sleep(0.1)
 except KeyboardInterrupt:
+    stop_event.set()
+    listen_thread.join()
     pass
 
 b.remove_xdp(iface, BPF.XDP_FLAGS_SKB_MODE)
 print("Detached BPF program.")
-
-

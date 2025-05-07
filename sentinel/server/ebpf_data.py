@@ -3,6 +3,9 @@ from server import sock_incoming, sock_block, send_socket
 from django.views.decorators.csrf import csrf_exempt
 import time
 
+# we send data we get from the udp port to the continuous stream
+# https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events
+
 def incoming(request: HttpRequest):
     def event_stream():
         while True:
