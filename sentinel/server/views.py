@@ -5,5 +5,6 @@ from django.template import loader
 def index(request: HttpRequest):
     return render(request, 'server/index.html')
 
+
 def log(request: HttpRequest):
     return HttpResponse("logging bzzt bzzt")
