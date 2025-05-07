@@ -24,6 +24,7 @@ struct ipv6_pkt {
 
 BPF_HASH(blacklist_ipv4, __be32, bool);
 BPF_HASH(blacklist_ipv6, struct ipv6_addr, bool);
+BPF_HASH(blacklist_protocol, u8, bool);
 
 BPF_RINGBUF_OUTPUT(incoming_ipv4, 1 << 4);
 BPF_RINGBUF_OUTPUT(incoming_ipv6, 1 << 4);
@@ -47,6 +48,13 @@ int handle_rx(struct xdp_md *ctx) {
         if ((void*)(eth + 1) + sizeof(struct iphdr) > data_end) {
             return XDP_PASS;
         }
+
+
+        // https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml        
+        if(blacklist_protocol.lookup(&ip->protocol)){
+          return XDP_DROP;
+        }
+
         __be32 saddr = ip->saddr;
         _Bool *elem = blacklist_ipv4.lookup(&saddr);
 
@@ -70,6 +78,12 @@ int handle_rx(struct xdp_md *ctx) {
         if((void*)(eth + 1) + sizeof(struct ipv6hdr) > data_end){
             return XDP_PASS;
         }
+
+        // https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml        
+        if(blacklist_protocol.lookup(&ip->nexthdr)){
+          return XDP_DROP;
+        }
+
         struct in6_addr saddr = ip->saddr;
         struct ipv6_addr map_key;
 
