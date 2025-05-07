@@ -15,3 +15,5 @@ python sentinel/manage.py runserver --noreload
 ```
 
 The web interface now should be running in localhost:8000
+
+The filter box is all purpose for now, it supports protocols and ip address based filtering
