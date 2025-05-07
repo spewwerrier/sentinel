@@ -26,9 +26,9 @@ log = logger.Logger(b)
 log.incoming()
 log.blocked()
 
-blacklist_protocol = b["blacklist_protocol"]
-blacklist_protocol[ctypes.c_uint8(1)] = ctypes.c_bool(True)
-blacklist_protocol[ctypes.c_uint8(58)] = ctypes.c_bool(True)
+# blacklist_protocol = b["blacklist_protocol"]
+# blacklist_protocol[ctypes.c_uint8(1)] = ctypes.c_bool(True)
+# blacklist_protocol[ctypes.c_uint8(58)] = ctypes.c_bool(True)
 
 # we listen on port 7779 and expect ipv4 and ipv6 and block them
 def listen_ip():
@@ -41,8 +41,11 @@ def listen_ip():
         utf_data = data.decode('utf-8')
         if (":" in utf_data):
             blocker.block_ipv6(b, utf_data)
-        else:
+        elif ("." in utf_data):
             blocker.block_ipv4(b, utf_data)
+        else:
+            blacklist_protocol = b["blacklist_protocol"]
+            blacklist_protocol[ctypes.c_uint8(int(data.decode('utf-8')))] = ctypes.c_bool(True)
         print(f"blocking ip {data.decode('utf-8')}")
 
 
