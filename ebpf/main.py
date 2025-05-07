@@ -48,9 +48,7 @@ def listen_ip():
         print(f"blocking ip {data.decode('utf-8')}")
 
 
-stop_event = threading.Event()
 listen_thread = threading.Thread(target=listen_ip)
-listen_thread.daemon = True
 listen_thread.start()
 
 try:
@@ -59,9 +57,9 @@ try:
         b.ring_buffer_poll()
         time.sleep(0.3)
 except KeyboardInterrupt:
-    stop_event.set()
+    b.remove_xdp(iface, BPF.XDP_FLAGS_SKB_MODE)
+    print("Detached BPF program.")
+
     listen_thread.join()
     pass
 
-b.remove_xdp(iface, BPF.XDP_FLAGS_SKB_MODE)
-print("Detached BPF program.")
