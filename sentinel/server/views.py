@@ -6,3 +6,6 @@ from django.template import loader
 # other request are done by ebpf_data.py
 def index(request: HttpRequest):
     return render(request, 'server/index.html')
+
+def filter_option(request: HttpRequest):
+    return render(request, 'server/filter.html')

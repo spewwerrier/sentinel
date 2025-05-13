@@ -2,15 +2,35 @@
 <html>
 <head>
 	<title>All The Incoming IP Addresses</title>
+  <style>
+		@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
 
-    <style>
+			body{
+				font-family: "Roboto Condensed";
+				background-color: #fbfcf9;
+			}
+
       #iptables, #headtable{
-          width: 500px;
-          border-collapse: collapse;
+        width: 600px;
+        border-collapse: collapse;
       }
+
+			.heading, .logging{
+				display: flex;
+				justify-content: center;
+			}
+		  #headtable{
+				margin-top: 10px;
+			}
+			#headtable th{
+				background-color: black;
+				font-size: 1.3em;
+				color: white;
+			}
+
       #iptables th, #iptables td {
-          border: 1px solid black;
-          padding: 4px;
+        border: 1px solid black;
+        padding: 4px;
       }
 
 		  #headtable th:first-child {
@@ -19,24 +39,23 @@
     </style>	
 </head>
 <body>
-	<h1>IP Logs</h1>
+	<h1>Incoming Traffic</h1>
 
-	<form method="POST" action="/filter" accept-charset="utf-8">
-		<input type="text" name="ipstring" required></input>
-		<button type="submit">submit</button>
-	</form>
-
+<div class="heading">
 	<table id="headtable" border=1>
 		<tr>
 			<th>Ip address</th>
 			<th>Packet Size</th>
 		</tr>
 	</table>
+</div>
 
+<div class="logging">
 	<table id="iptables" border=1>
 		<tr>
 		</tr>
 	</table>
+<div>
 
 	<div id="log">
 	</div>
@@ -57,10 +76,10 @@
         packetCell.innerText = packet;
 				if(json.blocked == "True"){
 					ipCell.style.color = "white";
-					ipCell.style.backgroundColor = "black";
+					ipCell.style.backgroundColor = "#7c1d1d";
 
 					packetCell.style.color = "white";
-					packetCell.style.backgroundColor = "black";
+					packetCell.style.backgroundColor = "#7c1d1d";
 				}
 
         const newRow = document.createElement("tr");
