@@ -4,7 +4,7 @@ from . import ebpf_data
 
 urlpatterns = [
     path('', views.index),
-    path('filterip', views.filter_option),
+    path('filter', views.filter_option),
     path('incoming/', ebpf_data.incoming),
-    path('filter', ebpf_data.filter)
+    path('filteration', ebpf_data.filter)
 ]
