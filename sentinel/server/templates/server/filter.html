@@ -8,14 +8,39 @@
 					font-family: "Roboto Condensed";
 					background-color: #fbfcf9;
 				}
+				button{
+					background-color: black;
+					color: white;
+					border: 0px;
+					font-size: 1.5em;
+				}
+
+				a{
+					font-size: 30px;
+					color: black;
+					text-decoration: none;
+				}
+				input, select{
+					font-size: 30px;
+				}
 		</style>
 	</head>
 	<body>
+	<div style="display: flex; justify-content: center">
+	<a href="/">Incoming Traffic</a>
+	  &nbsp;/&nbsp;
+	<a href="/filter" style="text-decoration: underline">Filter</a>
+	</div>
+
+	
+	<div style="margin-top: 5%;display: flex; justify-content: center; flex-direction: column; align-items: center">
 		IP YOU WANT TO BLOCK
 		<form method="POST" action="/filteration" accept-charset="utf-8">
 			<input type="text" name="ipstring" required></input>
 			<button type="submit">submit</button>
 		</form>
+	</div>
+	<div style="margin-top: 5%;display: flex; justify-content: center; flex-direction: column; align-items: center">
 		PROTOCOL YOU WANT TO BLOCK
 		<form method="POST" action="/filteration" accept-charset="utf-8">
 			<select name="ipstring" required>
@@ -31,5 +56,6 @@
 			</select>
 			<button type="submit">submit</button>
 		</form>
+	</div>
 	</body>
 </html>
