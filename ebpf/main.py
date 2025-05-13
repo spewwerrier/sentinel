@@ -11,8 +11,16 @@ import logger
 import iptypes
 import blocker
 
+iface = None
+try:
+    iface = sys.argv[1]
+except:
+    print("Network interface undefined. You can find one using `ip a`")
+    sys.exit(1)
+
 b = BPF(text=open('packet.ebpf.c', 'r').read())
-iface = "wlp3s0"
+# iface = "wlp3s0"
+# iface = interface
 fn = b.load_func("handle_rx", BPF.XDP)
 
 try:
