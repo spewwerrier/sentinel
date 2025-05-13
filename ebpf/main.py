@@ -12,7 +12,7 @@ import iptypes
 import blocker
 
 b = BPF(text=open('packet.ebpf.c', 'r').read())
-iface = "wlp2s0"
+iface = "wlp3s0"
 fn = b.load_func("handle_rx", BPF.XDP)
 
 try:
@@ -25,28 +25,37 @@ except Exception as e:
 log = logger.Logger(b)
 log.log()
 
-# blacklist_protocol = b["blacklist_protocol"]
-# blacklist_protocol[ctypes.c_uint8(1)] = ctypes.c_bool(True)
-# blacklist_protocol[ctypes.c_uint8(58)] = ctypes.c_bool(True)
-
-# we listen on port 7779 and expect ipv4 and ipv6 and block them
+listen_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 def listen_ip():
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_address = ('localhost', 7779)
-    sock.bind(server_address)
+    listen_socket.settimeout(0.5)
+    listen_socket.bind(server_address)
     print(f"listening for ip at 7779")
     while True:
-        data, address = sock.recvfrom(4096)
-        utf_data = data.decode('utf-8')
-        if (":" in utf_data):
-            blocker.block_ipv6(b, utf_data)
-        elif ("." in utf_data):
-            blocker.block_ipv4(b, utf_data)
-        else:
-            blacklist_protocol = b["blacklist_protocol"]
-            blacklist_protocol[ctypes.c_uint8(int(data.decode('utf-8')))] = ctypes.c_bool(True)
-        print(f"blocking ip {data.decode('utf-8')}")
-
+        try:
+            recv_socket, address = listen_socket.recvfrom(4096)
+            utf_data = recv_socket.decode('utf-8')
+            if (":" in utf_data):
+                blocker.block_ipv6(b, utf_data)
+            elif ("." in utf_data):
+                blocker.block_ipv4(b, utf_data)
+            else:
+                blacklist_protocol = b["blacklist_protocol"]
+                blacklist_protocol[ctypes.c_uint8(int(recv_socket.decode('utf-8')))] = ctypes.c_bool(True)
+            print(f"blocking ip {recv_socket.decode('utf-8')}")
+        except socket.timeout:
+            continue
+        except OSError as e:
+            # we get bad file descriptor (error 9) when we close the socket which we do
+            # on KeyboardInterrupt (ctrl-c) in main thread
+            # so instead of erring we just cleanly exit from the while loop
+            if e.errno == 9:
+                print("Socket is closed")
+                return
+            print(f"Failed to receive on socket {e}")
+        except Exception as e:
+            print(f"Something went wrong on socket {e}")
+            
 
 listen_thread = threading.Thread(target=listen_ip)
 listen_thread.start()
@@ -59,7 +68,7 @@ try:
 except KeyboardInterrupt:
     b.remove_xdp(iface, BPF.XDP_FLAGS_SKB_MODE)
     print("Detached BPF program.")
-
+    listen_socket.close()
+    print("Closed UDP socket.")
     listen_thread.join()
-    pass
-
+    print("Closed the socket thread")
