@@ -64,7 +64,7 @@ try:
     print("Running... (Ctrl+C to stop)")
     while True:
         b.ring_buffer_poll()
-        time.sleep(0.3)
+        time.sleep(0.1)
 except KeyboardInterrupt:
     b.remove_xdp(iface, BPF.XDP_FLAGS_SKB_MODE)
     print("Detached BPF program.")
