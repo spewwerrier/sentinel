@@ -48,8 +48,7 @@
 	<a href="/" style="text-decoration: underline">Incoming Traffic</a>
 	  &nbsp;/&nbsp;
 	<a href="/filter">Filter</a>
-	&nbsp;/&nbsp;
-	<a href="/arp_scan">Scan</a>
+	
 	</div>
 
 <div class="heading">

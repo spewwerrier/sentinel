@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARP & TCP Scan</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap');
+
+        body {
+            font-family: "Roboto Condensed", sans-serif;
+            background-color: #fbfcf9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 40px;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f1f1;
+        }
+
+        h2 {
+            margin-top: 40px;
+        }
+
+        .message {
+            margin-top: 20px;
+            color: #777;
+        }
+        a{
+				font-size: 30px;
+				color: black;
+				text-decoration: none;
+			}
+    </style>
+</head>
+<body>
+<div style="display: flex; justify-content: center">
+	<a href="/" >Incoming Traffic</a>
+	  &nbsp;/&nbsp;
+	<a href="/filter">Filter</a>	  &nbsp;/&nbsp;
+
+	<a href="/arp_scan"style="text-decoration: underline">Scan</a>
+	</div>
+
+    <h1>ARP & TCP Network Scanner</h1>
+
+    <!-- Trigger scan -->
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit">Start Scan</button>
+    </form>
+
+    <!-- ARP scan table -->
+    <h2>ARP Scan Results</h2>
+    {% if arp_result %}
+        <table>
+            <thead>
+                <tr>
+                    <th>IP Address</th>
+                    <th>MAC Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in arp_result %}
+                    <tr>
+                        <td>{{ item.ip }}</td>
+                        <td>{{ item.mac }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="message">No ARP results yet.</div>
+    {% endif %}
+
+    <!-- TCP scan table -->
+    <h2>TCP Port Scan Results</h2>
+    {% if tcp_result %}
+        <table>
+            <thead>
+                <tr>
+                    <th>IP Address</th>
+                    <th>Open Port</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in tcp_result %}
+                    <tr>
+                        <td>{{ item.ip }}</td>
+                        <td>{{ item.port }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="message">No TCP results yet.</div>
+    {% endif %}
+
+</body>
+</html>
+

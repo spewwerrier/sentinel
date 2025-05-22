@@ -6,6 +6,6 @@ urlpatterns = [
     path('', views.index),
     path('filter', views.filter_option),
     path('incoming/', ebpf_data.incoming),
-    path('filteration', ebpf_data.filter),
-    path('arp_scan/', views.network_scan_view)
+    
+    path('filteration', ebpf_data.filter)
 ]

@@ -55,7 +55,7 @@ ROOT_URLCONF = 'sentinel.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'server' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
