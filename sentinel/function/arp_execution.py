@@ -10,9 +10,6 @@ ip_range = ".".join(ipaddr.split(".")[:-1] + ["1/24"])
 # Send ARP requests
 packet = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=ip_range)
 
-# make this concurrent and srp like 20 times per time?? I wish this was golang.
-# https://docs.python.org/3/library/concurrent.futures.html#module-concurrent.futures
-
 ans, _ = srp(packet, timeout=2, verbose=0)
 
 # Print IP MAC per line (plain)
