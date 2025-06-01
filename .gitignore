@@ -1,1 +1,5 @@
 __pycache__/
+**/daisyui-theme.js
+**/daisyui.js
+**/tailwindcss-linux-x64
+**/output.css
