@@ -1,36 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('/static/output.css')
+
+
+:root {
+  --white: #fffffb;
+  --black: #000000;
+  --lightgreen: #e9fae3;
+  --green: #dee8d5;
+  --cream: #d5c7bc;
+  --purple: #3D348B;
+  --red: #6B2737;
+  --blue: #3943B7;
+}
 
 body {
   font-family: "Roboto Condensed";
-  background-color: #fbfcf9;
-  display: flex;
-  justify-content: center;
 }
 
-.container {
-  width: 80%;
-  max-width: 900px;
+
+.blocked-row{
+  color: var(--color-error-content);
 }
 
-.navigation {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.navigation a {
-  font-size: 30px;
-  color: black;
-  text-decoration: none;
-}
-
-.navigation a:not(:last-child) {
-  margin-right: 20px;
-}
-
-#iptables {
-  width: 100%;
-}
-.blocked-row {
-	color: red;
-}

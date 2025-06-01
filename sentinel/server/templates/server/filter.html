@@ -1,63 +1,81 @@
-<html>
-	<head>
-		<style>
-			@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
+<html data-theme="caramellatte">
 
-				body{
-					font-size: 1.3em;
-					font-family: "Roboto Condensed";
-					background-color: #fbfcf9;
-				}
-				button{
-					background-color: black;
-					color: white;
-					border: 0px;
-					font-size: 1.5em;
-				}
+<head>
+	<link rel="stylesheet" href="/static/output.css">
+</head>
 
-				a{
-					font-size: 30px;
-					color: black;
-					text-decoration: none;
-				}
-				input, select{
-					font-size: 30px;
-				}
-		</style>
-	</head>
-	<body>
-	<div style="display: flex; justify-content: center">
-	<a href="/">Incoming Traffic</a>
-	  &nbsp;/&nbsp;
-	<a href="/filter" style="text-decoration: underline">Filter</a>
-	&nbsp;/&nbsp;
-	<a href="/arp_scan">Scan</a>
-	</div>
+<body>
+	{% include 'nav.html' %}
 
-	
+
 	<div style="margin-top: 5%;display: flex; justify-content: center; flex-direction: column; align-items: center">
-		IP YOU WANT TO BLOCK
+
+		<span>FILTER IP ADDRESSES</span>
 		<form method="POST" action="/filteration" accept-charset="utf-8">
-			<input type="text" name="ipstring" required></input>
-			<button type="submit">submit</button>
+			<div class="join">
+				<input class="input" type="text" name="ipstring" required></input>
+				<button class="btn btn-primary" type="submit">submit</button>
+			</div>
 		</form>
+		<br>
+		<br>
+
+		<div role="alert" class="alert alert-info">
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-current">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+					d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+			</svg>
+			<span>Note: This blocks all the ip access in this network interface. Both IPv4 and IPv6 are supported!</span>
+		</div>
 	</div>
+	<br>
+	<br>
+	<br>
+
+
+	<div class="flex w-full flex-col">
+		<div class="divider divider-primary"><button class="btn btn-secondary">Filter Protocol</button></div>
+	</div>
+
+
 	<div style="margin-top: 5%;display: flex; justify-content: center; flex-direction: column; align-items: center">
-		PROTOCOL YOU WANT TO BLOCK
+		FILTER PROTOCOLS
 		<form method="POST" action="/filteration" accept-charset="utf-8">
-			<select name="ipstring" required>
-				<option value="1">ICMP</option>
-				<option value="4">IPv4</option>
-				<option value="6">TCP</option>
-				<option value="41">IPv6</option>
-				<option value="43">IPv6-Route</option>
-				<option value="44">IPv6-Frag</option>
-				<option value="58">IPv6-ICMP</option>
-				<option value="59">IPv6-NoNxt</option>
-				<option value="60">IPv6-Opts</option>
-			</select>
-			<button type="submit">submit</button>
+			<div class="join">
+				<select class="select" name="ipstring" required>
+					<option disabled selected>Select protocol to block</option>
+					<option value="1">ICMP</option>
+					<option value="4">IPv4</option>
+					<option value="6">TCP</option>
+					<option value="41">IPv6</option>
+					<option value="43">IPv6-Route</option>
+					<option value="44">IPv6-Frag</option>
+					<option value="58">IPv6-ICMP</option>
+					<option value="59">IPv6-NoNxt</option>
+					<option value="60">IPv6-Opts</option>
+				</select>
+				<button class="btn btn-primary" type="submit">submit</button>
+			</div>
 		</form>
+
+
+		<br>
+		<br>
+
+		<div role="alert" class="alert alert-info">
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-current">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+					d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+			</svg>
+			<span>Note: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+			</span>
+		</div>
+
 	</div>
-	</body>
+	<script>
+		nav_filter.classList.remove("btn-ghost")
+		nav_filter.classList.add("btn-success")
+	</script>
+</body>
+
 </html>

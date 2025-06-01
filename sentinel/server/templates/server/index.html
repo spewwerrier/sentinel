@@ -1,24 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="caramellatte">
+
 <head>
 	<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"></script>
 	<link rel="stylesheet" href="https://cdn.datatables.net/2.3.1/css/dataTables.dataTables.css" />
 	<script src="https://cdn.datatables.net/2.3.1/js/dataTables.js"></script>
 	<title>All The Incoming IP Addresses</title>
-	<link rel="stylesheet" href="static/style.css"></link>
+	<link rel="stylesheet" href="/static/output.css">
+	<link rel="stylesheet" href="/static/style.css">
+	</link>
 </head>
 
 <body>
-	<div class="container">
-		<div class="navigation">
-			<a href="/" style="text-decoration: underline">Incoming Traffic</a>
-			<span>/</span>
-			<a href="/filter">Filter</a>
-			<span>/</span>
-			<a href="/arp_scan">Scan</a>
-		</div>
+	{% include 'nav.html' %}
 
-		<table id="iptables" class="cell-border compact hover">
+	<div class="container" style="display: flex; justify-content: center;">
+		<table id="iptables" class="cell-border compact hover table" style="min-width: 900px; margin: 0 auto;">
 			<thead>
 				<tr>
 					<th>Index</th>
@@ -26,13 +23,15 @@
 					<th>PKT Size</th>
 				</tr>
 			</thead>
-
 			<tbody>
 			</tbody>
 		</table>
 	</div>
-
 	<script>
+
+		// this changes the navbar button's color corresponding to this page
+		nav_home.classList.remove("btn-ghost")
+		nav_home.classList.add("btn-success")
 
 		let table = new DataTable('#iptables', {
 			responsive: true,
@@ -52,15 +51,19 @@
 			if (json.blocked == "True") {
 				blocked = true;
 			}
-
 			let row = table.row.add([index, ip, packet]).draw(false).node();
+
 			if (blocked) {
-				$(row).addClass('blocked-row');
+				$(row).addClass('text-error');
+			}else{
+				$(row).addClass('text-success');
 			}
 			index += 1
-			
+
 		}
 	</script>
+
+
 </body>
 
 </html>
