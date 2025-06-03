@@ -65,7 +65,7 @@ int handle_rx(struct xdp_md *ctx) {
     struct ipv4_pkt pkt;
     pkt.pkt_size = data_len;
     pkt.saddr = saddr;
-    pkt.port = bpf_ntohs(tcp->source);
+    pkt.port = bpf_ntohs(tcp->dest);
     pkt.urg = bpf_ntohs(tcp->urg);
 
     // https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
@@ -115,7 +115,7 @@ int handle_rx(struct xdp_md *ctx) {
     struct ipv6_pkt pkt;
     pkt.pkt_size = data_len;
     pkt.saddr = saddr;
-    pkt.port = bpf_ntohs(tcp->source);
+    pkt.port = bpf_ntohs(tcp->dest);
     pkt.urg = bpf_ntohs(tcp->urg);
 
     // https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
