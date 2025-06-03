@@ -20,6 +20,8 @@
 				<tr>
 					<th>Index</th>
 					<th>IP Address</th>
+					<th>Port</th>
+					<th>Urgent</th>
 					<th>PKT Size</th>
 				</tr>
 			</thead>
@@ -35,7 +37,7 @@
 
 		let table = new DataTable('#iptables', {
 			responsive: true,
-			columns: [{width: '10%'}, {className: 'dt-body-center'}, {width: '10%'}],
+			columns: [{width: '10%'}, {className: 'dt-body-center'}, {width: '10%'}, {width: '10%'}, {width: '10%'}],
 			pageLength: "25",
 			order: [[0, 'desc']]
 		});
@@ -45,17 +47,24 @@
 		var index = 1
 		eventSource.onmessage = function (event) {
 			const json = JSON.parse(event.data);
+
 			const ip = json.ip;
 			const packet = json.packet;
+			const port = json.port;
+			const urg = json.urg;
+
 			var blocked = false;
 			if (json.blocked == "True") {
 				blocked = true;
 			}
-			let row = table.row.add([index, ip, packet]).draw(false).node();
+			let row = table.row.add([index, ip, port, urg, packet]).draw().node();
 
 			if (blocked) {
 				$(row).addClass('text-error');
 			}else{
+				// console.log("adding success")
+				// this should add class but when I'm on filtering mode it does not add the class
+				// I don't think this is our issue
 				$(row).addClass('text-success');
 			}
 			index += 1

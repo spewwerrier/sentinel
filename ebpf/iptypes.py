@@ -5,7 +5,9 @@ import ctypes
 class IPv4Pkt(ctypes.Structure):
     _fields_ = [
         ("saddr", ctypes.c_uint32),
-        ("pkt_size", ctypes.c_uint32)
+        ("pkt_size", ctypes.c_uint32),
+        ("port", ctypes.c_uint16),
+        ("urg", ctypes.c_uint16)
     ]
 
 class IPv6Addr(ctypes.Structure):
@@ -23,4 +25,6 @@ class IPv6Pkt(ctypes.Structure):
     _fields_ = [
         ("saddr", in6_addr),
         ("pkt_size", ctypes.c_uint32),
+        ("port", ctypes.c_uint16),
+        ("urg", ctypes.c_uint16)
     ]
