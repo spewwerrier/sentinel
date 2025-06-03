@@ -83,3 +83,7 @@ def honeypot_view(request):
     return render(request, 'server/honey.html', {
         'output': output
     })
+
+
+def visualize(request: HttpRequest):
+    return render(request, 'server/visualize.html')

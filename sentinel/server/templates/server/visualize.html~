@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html data-theme="caramellatte">
+
+<head>
+	<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"></script>
+	
+	<title>Honey Pot</title>
+	<link rel="stylesheet" href="/static/output.css">
+	<link rel="stylesheet" href="/static/style.css">
+	</link>
+</head>
+
+<body>
+	{% include 'nav.html' %}
+
+	<div class="container" style="display: flex; justify-content: center;">
+
+	</div>
+	
+
+
+</body>
+
+</html>
