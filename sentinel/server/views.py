@@ -6,7 +6,9 @@ import os
 import sys
 from django.conf import settings
 from server.models import IPV4_Packet
-import matplotlib.pyplot as plt
+from django.utils.timezone import localtime
+import calendar
+
 
 # in this program views.py are used for rendering a HTML template
 # other request are done by ebpf_data.py
@@ -87,32 +89,38 @@ def honeypot_view(request):
 
 
 def visualize(request: HttpRequest):
+
     saddr_list = list(IPV4_Packet.objects.values_list('saddr', flat=True).distinct())
-    saddr_list.insert(0, 'all')  # add an "all" option to the dropdown
+    saddr_list.insert(0, 'all') 
+
 
     selected = request.POST.get('saddr') if request.method == "POST" else 'all'
 
-    if selected == 'all':
-        packets = IPV4_Packet.objects.all()
-    else:
-        packets = IPV4_Packet.objects.filter(saddr=selected)
 
-    # Histogram data aggregation
+    packets = IPV4_Packet.objects.all() if selected == 'all' else IPV4_Packet.objects.filter(saddr=selected)
+
+
     sizes = [p.pkt_size for p in packets]
     size_counts = {}
     for size in sizes:
         size_counts[size] = size_counts.get(size, 0) + 1
-
     size_categories = sorted(size_counts.keys())
     size_frequencies = [size_counts[k] for k in size_categories]
 
-    # Scatter plot data: index vs port
+
     ports = [p.port for p in packets]
     port_counts = {}
     for port in ports:
-     port_counts[port] = port_counts.get(port, 0) + 1
+        port_counts[port] = port_counts.get(port, 0) + 1
+    port_scatter = [[port, port_counts[port]] for port in sorted(port_counts)]
 
-     port_scatter = [[port, port_counts[port]] for port in sorted(port_counts)]
+
+    ip_list = sorted(set(p.saddr for p in packets))
+    ip_index_map = {ip: i for i, ip in enumerate(ip_list)}
+    ip_timestamp_scatter = [
+        [calendar.timegm(localtime(p.timestamp).utctimetuple()) * 1000, ip_index_map[p.saddr]]
+        for p in packets
+    ]
 
     context = {
         'packets': packets,
@@ -121,5 +129,8 @@ def visualize(request: HttpRequest):
         'size_categories': size_categories,
         'size_frequencies': size_frequencies,
         'port_scatter': port_scatter,
+        'ip_timestamp_scatter': ip_timestamp_scatter,
+        'ip_categories': ip_list,
     }
+
     return render(request, 'server/visualize.html', context)

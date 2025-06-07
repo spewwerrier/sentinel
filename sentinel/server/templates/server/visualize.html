@@ -13,29 +13,35 @@
 <body>
     {% include 'nav.html' %}
 
-    <div class="container" style="display: flex; justify-content: center;">
-      <table border="1" cellpadding="5" cellspacing="0">
-        <thead>
-            <tr>
-                <th> Source Address </th>
-                <th> Packet Size </th>
-                <th> Port </th>
-                <th> URG </th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for packet in packets %}
-                <tr>
-                    <td>{{ packet.saddr }}</td>
-                    <td>{{ packet.pkt_size }}</td>
-                    <td>{{ packet.port }}</td>
-                    <td>{{ packet.urg }}</td>
-                </tr>
-            {% empty %}
-                <tr><td colspan="4">No packets found.</td></tr>
-            {% endfor %}
-        </tbody>
-      </table>
+    <div class="container"  style="overflow-x: auto; margin: 20px auto; max-width: 90%;">
+  <table border="1" cellpadding="10" cellspacing="0" style="width: 100%; border-collapse: collapse; text-align: center; font-family: Arial, sans-serif; font-size: 16px;">
+      <thead style="background-color: #e6e6e6; font-weight: bold;">
+          <tr>
+              <th>SN</th>
+              <th>Source Address</th>
+              <th>Packet Size (bytes)</th>
+              <th>Port</th>
+              <th>URG</th>
+              <th>Timestamp</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for packet in packets %}
+              <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ packet.saddr }}</td>
+                  <td>{{ packet.pkt_size }}</td>
+                  <td>{{ packet.port }}</td>
+                  <td>{{ packet.urg }}</td>
+                  <td>{{ packet.timestamp|date:"Y-m-d H:i:s" }}</td>
+              </tr>
+          {% empty %}
+              <tr>
+                  <td colspan="6">No packets found.</td>
+              </tr>
+          {% endfor %}
+      </tbody>
+  </table>
     </div>
     
     
@@ -61,6 +67,8 @@
     </div>    
 <div id="histogram" style="width: 80%; height: 400px; margin: 50px auto;"></div>
 <div id="scatterplot" style="width: 80%; height: 400px; margin: 50px auto;"></div>
+<div id="timestamp_ip_plot" style="width: 100%; height: 500px; margin: 50px auto;"></div>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -94,34 +102,87 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Scatter plot of port vs frequency
-    Highcharts.chart('scatterplot', {
-        chart: { type: 'scatter', zoomType: 'xy' },
+  Highcharts.chart('scatterplot', {
+    chart: { type: 'scatter', zoomType: 'xy' },
+    title: {
+        text: 'Port Frequency Scatterplot',
+        style: { fontWeight: 'bold', fontSize: '20px' }
+    },
+    xAxis: {
         title: {
-            text: 'Port Frequency Scatterplot',
+            text: 'Port',
             style: { fontWeight: 'bold', fontSize: '20px' }
         },
-        xAxis: {
-            title: {
-                text: 'Port',
-                style: { fontWeight: 'bold', fontSize: '20px' }
-            },
-            labels: { style: { fontSize: '20px' } },
-            allowDecimals: false
+        labels: { style: { fontSize: '20px' } },
+        allowDecimals: false
+    },
+    yAxis: {
+        title: {
+            text: 'Packet Count',
+            style: { fontWeight: 'bold', fontSize: '20px' }
         },
-        yAxis: {
-            title: {
-                text: 'Packet Count',
-                style: { fontWeight: 'bold', fontSize: '20px' }
-            },
-            labels: { style: { fontSize: '20px' } },
-            allowDecimals: false
+        labels: { style: { fontSize: '20px' } },
+        allowDecimals: false
+    },
+    series: [{
+        name: 'Port Frequency',
+        color: '#d62728',
+        data: {{ port_scatter|safe }},
+        marker: {
+            radius: 7,
+            symbol: 'circle',
+            fillColor: '#d62728',
+            lineColor: '#222',
+            lineWidth: 1
+        }
+    }]
+});
+Highcharts.chart('timestamp_ip_plot', {
+    chart: {
+        type: 'scatter',
+        zoomType: 'x'
+    },
+    title: {
+        text: 'Packet Timestamps by Source IP',
+        style: { fontSize: '20px', fontWeight: 'bold' }
+    },
+    xAxis: {
+        type: 'datetime',
+        title: {
+            text: 'Timestamp',
+            style: { fontSize: '20px', fontWeight: 'bold' }
         },
-        series: [{
-            name: 'Port Frequency',
-            color: '#d62728',  // darker red
-            data: {{ port_scatter|safe }}
-        }]
-    });
+        labels: {
+            rotation: 45,
+            style: { fontSize: '20px' }
+        }
+    },
+    yAxis: {
+        categories: {{ ip_categories|safe }},
+        title: {
+            text: 'Source IP',
+            style: { fontSize: '20px', fontWeight: 'bold' }
+        },
+        labels: {
+            style: { fontSize: '20px' }
+        }
+    },
+    tooltip: {
+        formatter: function () {
+            return `<b>${this.series.name}</b><br/>` +
+                   `IP: ${this.chart.yAxis[0].categories[this.y]}<br/>` +
+                   `Time: ${Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x)}`;
+        }
+    },
+    series: [{
+        name: 'Packets',
+        data: {{ ip_timestamp_scatter|safe }},
+        marker: {
+            radius: 6,
+            fillColor: '#7CFC00' 
+        }
+    }]
+});
 });
 </script>
 </body>
