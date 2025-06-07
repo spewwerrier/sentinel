@@ -9,5 +9,6 @@ urlpatterns = [
     path('filteration', ebpf_data.filter),
     path('arp_scan/', views.network_scan_view),
     path('honey/',views.honeypot_view),
-    path('visualize/',views.visualize)
+    path('visualize/',views.visualize),
+    path('analyze/', views.analyze_saddr, name='analyze_saddr'),
 ]

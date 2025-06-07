@@ -14,9 +14,49 @@
 	{% include 'nav.html' %}
 
 	<div class="container" style="display: flex; justify-content: center;">
-
+	  <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th> Source Address </th>
+                <th> Packet Size </th>
+                <th> Port </th>
+                <th> URG </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for packet in packets %}
+                <tr>
+                    <td>{{ packet.saddr }}</td>
+                    <td>{{ packet.pkt_size }}</td>
+                    <td>{{ packet.port }}</td>
+                    <td>{{ packet.urg }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="4">No packets found.</td></tr>
+            {% endfor %}
+        </tbody>
+        </table>
 	</div>
 	
+	
+    <div class='container1' style="display: flex; justify-content: center; margin: 75px 50px 75px 100px; flex-direction:column">
+       <h2 style="margin-bottom: 1em; justify-content: center;">Select Source Address </h2>
+       <br>
+       <form method="post" style="justify-content: center;">
+        {% csrf_token %}
+        <select name="saddr">
+            {% for addr in saddr_list %}
+                <option value="{{ addr }}" {% if selected == addr %}selected{% endif %}>{{ addr }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Generate Plot</button>
+        </form>
+
+        {% if graph_url %}
+        <h3>Plot for {{ selected }}</h3>
+        <img src="{{ graph_url }}" alt="Packet Plot" />
+        {% endif %}
+        </div>	
 
 
 </body>

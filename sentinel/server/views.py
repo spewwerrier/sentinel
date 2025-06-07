@@ -5,7 +5,7 @@ import subprocess
 import os
 import sys
 from django.conf import settings
-
+from server.models import IPV4_Packet
 
 # in this program views.py are used for rendering a HTML template
 # other request are done by ebpf_data.py
@@ -86,4 +86,36 @@ def honeypot_view(request):
 
 
 def visualize(request: HttpRequest):
-    return render(request, 'server/visualize.html')
+ packets = IPV4_Packet.objects.all()
+ saddr_list=IPV4_Packet.objects.values_list('saddr',flat=True).distinct()
+ selected = None
+ graph_url = None  # We'll handle this in the next step
+
+ return render(request, 'server/visualize.html', {
+        'packets': packets,
+        'saddr_list': saddr_list,
+        'selected': selected,
+        'graph_url': graph_url
+    })
+
+def analyze_saddr(request):
+    saddr_list = IPV4_Packet.objects.values_list('saddr', flat=True).distinct()
+    selected = None
+    graph_url = None
+
+    if request.method == "POST":
+        selected = request.POST.get("saddr")
+        script_path = os.path.join(settings.BASE_DIR, 'function', 'plot_generator.py')
+        python_exec = sys.executable
+
+        try:
+            subprocess.run([python_exec, script_path, selected], check=True)
+            graph_url = '/static/plot.png'
+        except subprocess.CalledProcessError as e:
+            graph_url = None
+
+    return render(request, 'server/visualize.html', {
+        'saddr_list': saddr_list,
+        'selected': selected,
+        'graph_url': graph_url,
+    })
