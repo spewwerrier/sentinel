@@ -2,19 +2,19 @@
 <html data-theme="caramellatte">
 
 <head>
-	<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"></script>
-	
-	<title>Visualization</title>
-	<link rel="stylesheet" href="/static/output.css">
-	<link rel="stylesheet" href="/static/style.css">
-	</link>
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+
+    <title>Visualization</title>
+    <link rel="stylesheet" href="/static/output.css">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
-	{% include 'nav.html' %}
+    {% include 'nav.html' %}
 
-	<div class="container" style="display: flex; justify-content: center;">
-	  <table border="1" cellpadding="5" cellspacing="0">
+    <div class="container" style="display: flex; justify-content: center;">
+      <table border="1" cellpadding="5" cellspacing="0">
         <thead>
             <tr>
                 <th> Source Address </th>
@@ -35,30 +35,96 @@
                 <tr><td colspan="4">No packets found.</td></tr>
             {% endfor %}
         </tbody>
-        </table>
-	</div>
-	
-	
-    <div class='container1' style="display: flex; justify-content: center; margin: 75px 50px 75px 100px; flex-direction:column">
+      </table>
+    </div>
+    
+    
+    <div class='container1' style="display: flex; justify-content: center; margin: 75px 50px 75px 100px; flex-direction: column;">
        <h2 style="margin-bottom: 1em; justify-content: center;">Select Source Address </h2>
        <br>
-       <form method="post" style="justify-content: center;">
+       <form method="post" style="display: flex; align-items: center; gap: 10px;">
         {% csrf_token %}
-        <select name="saddr">
-            {% for addr in saddr_list %}
-                <option value="{{ addr }}" {% if selected == addr %}selected{% endif %}>{{ addr }}</option>
-            {% endfor %}
-        </select>
+   <select name="saddr">
+    {% for addr in saddr_list %}
+        <option value="{{ addr }}" {% if selected == addr %}selected{% endif %}>
+            {{ addr|capfirst }}
+        </option>
+    {% endfor %}
+</select>
         <button type="submit">Generate Plot</button>
-        </form>
+       </form>
 
         {% if graph_url %}
         <h3>Plot for {{ selected }}</h3>
         <img src="{{ graph_url }}" alt="Packet Plot" />
         {% endif %}
-        </div>	
+    </div>    
+<div id="histogram" style="width: 80%; height: 400px; margin: 50px auto;"></div>
+<div id="scatterplot" style="width: 80%; height: 400px; margin: 50px auto;"></div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Histogram for packet sizes
+    Highcharts.chart('histogram', {
+        chart: { type: 'column' },
+        title: {
+            text: 'Packet Size Frequency',
+            style: { fontWeight: 'bold', fontSize: '25px' }
+        },
+        xAxis: {
+            categories: {{ size_categories|safe }},
+            title: {
+                text: 'Packet Size',
+                style: { fontWeight: 'bold', fontSize: '20px' }
+            },
+            labels: { style: { fontSize: '20px' } }
+        },
+        yAxis: {
+            title: {
+                text: 'Frequency',
+                style: { fontWeight: 'bold', fontSize: '20px' }
+            },
+            labels: { style: { fontSize: '20px' } }
+        },
+        series: [{
+            name: 'Packets',
+            data: {{ size_frequencies|safe }},
+            color: '#1f77b4'  // darker blue
+        }]
+    });
 
+    // Scatter plot of port vs frequency
+    Highcharts.chart('scatterplot', {
+        chart: { type: 'scatter', zoomType: 'xy' },
+        title: {
+            text: 'Port Frequency Scatterplot',
+            style: { fontWeight: 'bold', fontSize: '20px' }
+        },
+        xAxis: {
+            title: {
+                text: 'Port',
+                style: { fontWeight: 'bold', fontSize: '20px' }
+            },
+            labels: { style: { fontSize: '20px' } },
+            allowDecimals: false
+        },
+        yAxis: {
+            title: {
+                text: 'Packet Count',
+                style: { fontWeight: 'bold', fontSize: '20px' }
+            },
+            labels: { style: { fontSize: '20px' } },
+            allowDecimals: false
+        },
+        series: [{
+            name: 'Port Frequency',
+            color: '#d62728',  // darker red
+            data: {{ port_scatter|safe }}
+        }]
+    });
+});
+</script>
 </body>
 
 </html>
+

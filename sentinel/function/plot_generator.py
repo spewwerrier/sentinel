@@ -1,34 +1,39 @@
+
 # function/plot_generator.py
+
 import sys
 import os
 import matplotlib.pyplot as plt
 import django
 
-# Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'your_project.settings')
+# ---- Django setup ----
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(PROJECT_ROOT)
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sentinel.settings')
 django.setup()
 
 from server.models import IPV4_Packet
 
-def main(saddr):
-    packets = IPV4_Packet.objects.filter(saddr=saddr)
-    sizes = [p.pkt_size for p in packets]
+# ---- Get the saddr from command line ----
+if len(sys.argv) != 2:
+    print("Usage: python plot_generator.py <saddr>")
+    sys.exit(1)
 
-    if not sizes:
-        print("No data")
-        return
+saddr = sys.argv[1]
 
-    plt.figure()
-    plt.hist(sizes, bins=10, color='skyblue')
-    plt.title(f'Packet Sizes for {saddr}')
-    plt.xlabel('Packet Size')
-    plt.ylabel('Frequency')
+# ---- Query the database ----
+packets = IPV4_Packet.objects.filter(saddr=saddr)
+sizes = [p.pkt_size for p in packets]
 
-    output_path = os.path.join('static', 'plot.png')
-    plt.savefig(output_path)
-    print("OK")
+if not sizes:
+    print("No data for", saddr)
+    sys.exit(0)
 
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        main(sys.argv[1])
+# ---- Plotting ----
+plt.figure(figsize=(8, 5))
+plt.hist(sizes, bins=10, color='skyblue', edgecolor='black')
+plt.title(f"Packet Sizes for {saddr}")
+plt.xlabel("Packet Size")
+plt.show()
 
+# ---- Save to static/plot.png --

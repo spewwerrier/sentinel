@@ -6,6 +6,7 @@ import os
 import sys
 from django.conf import settings
 from server.models import IPV4_Packet
+import matplotlib.pyplot as plt
 
 # in this program views.py are used for rendering a HTML template
 # other request are done by ebpf_data.py
@@ -86,36 +87,39 @@ def honeypot_view(request):
 
 
 def visualize(request: HttpRequest):
- packets = IPV4_Packet.objects.all()
- saddr_list=IPV4_Packet.objects.values_list('saddr',flat=True).distinct()
- selected = None
- graph_url = None  # We'll handle this in the next step
+    saddr_list = list(IPV4_Packet.objects.values_list('saddr', flat=True).distinct())
+    saddr_list.insert(0, 'all')  # add an "all" option to the dropdown
 
- return render(request, 'server/visualize.html', {
+    selected = request.POST.get('saddr') if request.method == "POST" else 'all'
+
+    if selected == 'all':
+        packets = IPV4_Packet.objects.all()
+    else:
+        packets = IPV4_Packet.objects.filter(saddr=selected)
+
+    # Histogram data aggregation
+    sizes = [p.pkt_size for p in packets]
+    size_counts = {}
+    for size in sizes:
+        size_counts[size] = size_counts.get(size, 0) + 1
+
+    size_categories = sorted(size_counts.keys())
+    size_frequencies = [size_counts[k] for k in size_categories]
+
+    # Scatter plot data: index vs port
+    ports = [p.port for p in packets]
+    port_counts = {}
+    for port in ports:
+     port_counts[port] = port_counts.get(port, 0) + 1
+
+     port_scatter = [[port, port_counts[port]] for port in sorted(port_counts)]
+
+    context = {
         'packets': packets,
         'saddr_list': saddr_list,
         'selected': selected,
-        'graph_url': graph_url
-    })
-
-def analyze_saddr(request):
-    saddr_list = IPV4_Packet.objects.values_list('saddr', flat=True).distinct()
-    selected = None
-    graph_url = None
-
-    if request.method == "POST":
-        selected = request.POST.get("saddr")
-        script_path = os.path.join(settings.BASE_DIR, 'function', 'plot_generator.py')
-        python_exec = sys.executable
-
-        try:
-            subprocess.run([python_exec, script_path, selected], check=True)
-            graph_url = '/static/plot.png'
-        except subprocess.CalledProcessError as e:
-            graph_url = None
-
-    return render(request, 'server/visualize.html', {
-        'saddr_list': saddr_list,
-        'selected': selected,
-        'graph_url': graph_url,
-    })
+        'size_categories': size_categories,
+        'size_frequencies': size_frequencies,
+        'port_scatter': port_scatter,
+    }
+    return render(request, 'server/visualize.html', context)
