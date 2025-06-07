@@ -58,32 +58,5 @@ def network_scan_view(request):
         'tcp_result': tcp_result
     })
 
-
-def honeypot_view(request):
-    output = ""
-
-    if request.method == "POST":
-        python_exec = sys.executable
-        base = settings.BASE_DIR
-        honeypot_script = os.path.join(base, 'function', 'honeypot.py')  # adjust path if needed
-
-        try:
-            result = subprocess.run(
-                [python_exec, honeypot_script],
-                capture_output=True,
-                text=True,
-                timeout=10  # prevent hanging
-            )
-            output = result.stdout + result.stderr
-        except subprocess.CalledProcessError as e:
-            output = f"Error during execution: {e.output}"
-        except Exception as e:
-            output = f"Unhandled error: {str(e)}"
-
-    return render(request, 'server/honey.html', {
-        'output': output
-    })
-
-
-def visualize(request: HttpRequest):
-    return render(request, 'server/visualize.html')
+def index(request: HttpRequest):
+    return render(request, 'server/index.html')

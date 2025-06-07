@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html data-theme="caramellatte">
+
+<head>
+	<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"></script>
+	
+	<title>Honey Pot</title>
+	<link rel="stylesheet" href="/static/output.css">
+	<link rel="stylesheet" href="/static/style.css">
+	</link>
+</head>
+
+<body>
+	{% include 'nav.html' %}
+
+	<div class="container" style="display: flex; justify-content: center;">
+
+
+  {% if output %}
+    <h2>Honeypot Output</h2>
+    <pre>{{ output }}</pre>
+  {% else %}
+    <div style="margin-top: 40px; margin-bottom:40px;">No honeypot output yet.</div>
+  {% endif %}
+<form method="POST">
+    {% csrf_token %}
+    <div class="join" style="display: flex; justify-content: center; margin-top: 2rem;" >
+      <button type="submit" class="join-item btn btn-primary">Start Honeypot</button>
+    </div>
+  </form>
+    <div style="margin-top: 40px;"></div>
+
+  <script>
+    if (typeof nav_scan !== 'undefined') {
+      nav_honey.classList.remove("btn-ghost");
+      nav_honey.classList.add("btn-success");
+    }
+  </script>
+
+	</div>
+	
+
+
+</body>
+
+</html>
