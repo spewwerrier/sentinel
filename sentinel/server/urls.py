@@ -9,5 +9,6 @@ urlpatterns = [
     path('filteration', ebpf_data.filter),
     path('arp_scan/', views.network_scan_view),
     path('honey/',views.honeypot_view),
-    path('visualize/',views.visualize)
+    path('visualize/',views.visualize),
+    path('geoip/', views.geoip_lookup, name='geoip_lookup')
 ]

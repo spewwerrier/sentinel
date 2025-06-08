@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html data-theme="caramellatte">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoIP Lookup</title>
+  
+  <link rel="stylesheet" href="/static/output.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    button {
+      border: none;
+      cursor: pointer;
+    }
+    table {
+      width: 80%;
+      border-collapse: collapse;
+    }
+    th, td {
+      text-align: left;
+    }
+    a {
+      text-decoration: none;
+    }
+    
+    #map {
+      height: 400px;
+      width: 80%;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  {% include 'nav.html' %}
+  
+  
+  <form method="POST" style="margin-top: 40px; margin-bottom:40px;">
+    {% csrf_token %}
+    <div class="join">
+      <input type="text" name="ip_address" placeholder="Enter IP Address" class="input" required>
+      <button class="btn join-item btn-primary" type="submit">Get GeoIP Info</button>
+    </div>
+  </form>
+  
+  <br><br><br>
+  
+  
+  <h2>GeoIP Lookup Result</h2>
+  {% if ip_address %}
+    <p><strong>IP Address:</strong> {{ ip_address }}</p>
+    <p><strong>Country:</strong> {{ country }}</p>
+    <p><strong>City:</strong> {{ city }}</p>
+    <p><strong>Latitude:</strong> {{ latitude }}</p>
+    <p><strong>Longitude:</strong> {{ longitude }}</p>
+    
+    
+    <div id="map"></div>
+    
+    
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+      
+      var latitude = {{ latitude }};
+      var longitude = {{ longitude }};
+
+      
+      var map = L.map('map').setView([latitude, longitude], 13);
+
+      
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      
+      L.marker([latitude, longitude]).addTo(map)
+          .bindPopup(`<b>Location:</b> ${latitude}, ${longitude}`)
+          .openPopup();
+    </script>
+  
+  {% elif ip_address is not none %}
+    <p>No data found for this IP address.</p>
+  {% endif %}
+  
+  <script>
+    nav_trace.classList.remove("btn-ghost");
+    nav_trace.classList.add("btn-success");
+  </script>
+</body>
+
+</html>
+

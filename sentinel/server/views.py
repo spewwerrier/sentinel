@@ -8,6 +8,7 @@ from django.conf import settings
 from server.models import IPV4_Packet
 from django.utils.timezone import localtime
 import calendar
+import maxminddb
 
 
 # in this program views.py are used for rendering a HTML template
@@ -134,3 +135,46 @@ def visualize(request: HttpRequest):
     }
 
     return render(request, 'server/visualize.html', context)
+
+def geoip_lookup(request):
+    ip_address = None
+    country = None
+    city = None
+    latitude = None
+    longitude = None
+
+    if request.method == 'POST':
+        # Get IP address from form
+        ip_address = request.POST.get('ip_address')
+
+        # Check if IP address is provided
+        if ip_address:
+            try:
+                # Open the GeoLite2 database
+                with maxminddb.open_database('./sentinel/function/GeoLite2-City.mmdb') as reader:
+                    result = reader.get(ip_address)
+
+                # Extract the GeoIP data
+                if result:
+                    country = result.get('country', {}).get('names', {}).get('en', 'N/A')
+                    city = result.get('city', {}).get('names', {}).get('en', 'N/A')
+                    latitude = result.get('location', {}).get('latitude', 'N/A')
+                    longitude = result.get('location', {}).get('longitude', 'N/A')
+                else:
+                    country = 'N/A'
+                    city = 'N/A'
+                    latitude = 'N/A'
+                    longitude = 'N/A'
+            except Exception as e:
+                country = city = latitude = longitude = 'Error: ' + str(e)
+
+    # Pass the result to the template
+    context = {
+        'ip_address': ip_address,
+        'country': country,
+        'city': city,
+        'latitude': latitude,
+        'longitude': longitude,
+    }
+
+    return render(request, 'server/geoip.html', context)
