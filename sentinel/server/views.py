@@ -90,6 +90,7 @@ def honeypot_view(request):
 
 
 def visualize(request: HttpRequest):
+    # IPV4_Packet.save(IPV4_Packet)
 
     saddr_list = list(IPV4_Packet.objects.values_list('saddr', flat=True).distinct())
     saddr_list.insert(0, 'all') 
