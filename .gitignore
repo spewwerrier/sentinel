@@ -3,3 +3,4 @@ __pycache__/
 **/daisyui.js
 **/tailwindcss-linux-x64
 **/output.css
+honeypot.log
