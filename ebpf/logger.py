@@ -3,6 +3,19 @@ import socket
 import sys
 from bcc import BPF
 import ctypes
+import subprocess
+
+# Path to the basic_DDoS.py script
+BASIC_DDOS_SCRIPT = "/home/bodhi/Documents/sentinel/sentinel_sim/sentinel/basic_DDoS.py"
+
+# Function to start the basic_DDoS.py script in the background
+def start_ddos_detection():
+    try:
+        # Start basic_DDoS.py in the background using subprocess
+        subprocess.Popen(['python3', BASIC_DDOES_SCRIPT], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print("[+] basic_DDoS.py started in the background.")
+    except Exception as e:
+        print(f"[!] Error starting basic_DDoS.py: {e}")
 
 incoming_socket = None
 INCOMING_PORT = 7777
